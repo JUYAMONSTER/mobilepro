@@ -1,0 +1,4 @@
+<resources>
+    <!-- 카카오 네이티브 앱 키 -->
+    <string name="kakao_native_app_key">your_kakao_native_app_key_here</string>
+</resources>
