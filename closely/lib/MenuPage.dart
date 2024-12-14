@@ -3,6 +3,11 @@ import 'package:closely/AccountPage.dart';
 import 'package:closely/SettingPage.dart';
 import 'package:closely/FavoritePage.dart';
 import 'package:closely/ClothingListPage.dart';
+import 'package:closely/LaundryPage.dart';
+import 'package:closely/SeasonClothPage.dart';
+import 'package:closely/closeappend.dart';
+import 'package:closely/ClothPlus.dart';
+import 'package:closely/NotificationPage.dart'; // NotificationPage 임포트
 import 'MainPage.dart';
 
 class MenuPage extends StatelessWidget {
@@ -28,9 +33,36 @@ class MenuPage extends StatelessWidget {
             );
           }),
 
+          // 계절별 옷
+          _buildMenuItem(context, '계절별 옷', Icons.person, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SeasonCloth()),
+            );
+          }),
+
+          // 즐겨찾기
+          _buildMenuItem(context, '즐겨찾기', Icons.star, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => FavoritePage()),
+            );
+          }),
+
           // 근처 세탁소 찾기
           _buildMenuItem(context, '근처 세탁소 찾기', Icons.local_laundry_service, () {
-            // TODO: 동작 추가 (지도 API 호출 등)
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LaundryPage()),
+            );
+          }),
+
+          // 의류 관리 알림
+          _buildMenuItem(context, '의류 관리 알림', Icons.notifications, () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationPage()), // NotificationPage로 이동
+            );
           }),
 
           // 앱 설정
@@ -39,25 +71,6 @@ class MenuPage extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => SettingsPage()),
             );
-          }),
-          _buildMenuItem(context, '즐겨찾기', Icons.star, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => FavoritePage()),
-            );
-          }),
-
-          // 계정 설정
-          _buildMenuItem(context, '계정 설정', Icons.person, () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AccountPage()),
-            );
-          }),
-
-          // 의류 관리 알림
-          _buildMenuItem(context, '의류 관리 알림', Icons.notifications, () {
-            // TODO: 동작 추가 (알림 설정 페이지로 이동 등)
           }),
         ],
       ),

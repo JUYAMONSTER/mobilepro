@@ -1,75 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'Login.dart'; // LoginPage 클래스가 정의된 파일 import
 
-class SignUpPage extends StatefulWidget {
-  @override
-  _SignUpPageState createState() => _SignUpPageState();
-}
-
-class _SignUpPageState extends State<SignUpPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  void _signUp() async {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-    String confirmPassword = _confirmPasswordController.text.trim();
-
-    if (password != confirmPassword) {
-      _showDialog('오류', '비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
-    try {
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      _showDialog('성공', '회원 가입에 성공하였습니다.', autoClose: true, onClose: () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => LoginPage()),
-        );
-      });
-    } on FirebaseAuthException catch (e) {
-      _showDialog('오류', e.message ?? '회원 가입에 실패하였습니다.');
-    }
-  }
-
-  void _showDialog(String title, String message, {bool autoClose = false, VoidCallback? onClose}) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: <Widget>[
-            TextButton(
-              child: Text('확인'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (onClose != null) onClose();
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    if (autoClose) {
-      Future.delayed(Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.of(context).pop();
-          if (onClose != null) onClose();
-        }
-      });
-    }
-  }
-
+class SignUpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,6 +21,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: Column(
                 children: [
+                  // 회원가입 텍스트
                   Text(
                     '새 계정 만들기',
                     style: TextStyle(
@@ -99,8 +31,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: 20),
+
+                  // 이메일 입력 필드
                   TextFormField(
-                    controller: _emailController,
                     decoration: InputDecoration(
                       labelText: '이메일 주소',
                       border: OutlineInputBorder(
@@ -111,8 +44,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: 20),
+
+                  // 비밀번호 입력 필드
                   TextFormField(
-                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: '비밀번호',
@@ -124,8 +58,9 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: 20),
+
+                  // 비밀번호 확인 필드
                   TextFormField(
-                    controller: _confirmPasswordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: '비밀번호 확인',
@@ -137,8 +72,13 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: 40),
+
+                  // 회원가입 버튼
                   ElevatedButton(
-                    onPressed: _signUp,
+                    onPressed: () {
+                      // 회원가입 처리 로직 추가
+                      // 예시: 회원가입 정보 전송 또는 확인
+                    },
                     child: Text('회원가입'),
                     style: ElevatedButton.styleFrom(
                       minimumSize: Size(double.infinity, 50),

@@ -1,23 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao_sdk;
-import 'package:kakao_flutter_sdk_common/kakao_flutter_sdk_common.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';  // flutter_dotenv 패키지 임포트
 import 'package:closely/SignUpPage.dart';  // 필요한 페이지
 import 'MainPage.dart';  // 메인 페이지로 이동할 페이지
+import 'package:google_sign_in/google_sign_in.dart';  // google_sign_in 패키지 임포트
 
-void main() async {
-  // 앱 초기화 전에 .env 파일 로드
-  await dotenv.load();
-
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 카카오 SDK 초기화
-  KakaoSdk.init(
-    nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? '',  // .env에서 네이티브 앱 키 불러오기
-    javaScriptAppKey: dotenv.env['KAKAO_JAVASCRIPT_APP_KEY'] ?? '',  // .env에서 자바스크립트 앱 키 불러오기
-  );
-
   runApp(MyApp());
 }
 
@@ -40,8 +28,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+      clientId: '691328470279-d28kh7fole22giesrqhs6q84rv2av1dm.apps.googleusercontent.com',
+  ); // clientId 제거
 
-  // Firebase 로그인 메서드
+  // Firebase 로그인 메서드 (이메일/비밀번호)
   void _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -52,33 +43,45 @@ class _LoginPageState extends State<LoginPage> {
         password: password,
       );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Mainpage()),
-      );
+      if (mounted) {
+        // 화면 전환을 안전하게 처리
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Mainpage()),
+        );
+      }
     } on FirebaseAuthException catch (e) {
       _showErrorDialog(e.message ?? '로그인에 실패하였습니다.');
     }
   }
 
-  // 카카오 로그인 메서드
-  void _loginWithKakao() async {
+  // Google 로그인 메서드
+  Future<void> _googleLogin() async {
     try {
-      if (await isKakaoTalkInstalled()) {
-        await kakao_sdk.UserApi.instance.loginWithKakaoTalk();
-      } else {
-        await kakao_sdk.UserApi.instance.loginWithKakaoAccount();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return; // 사용자가 로그인 취소한 경우
       }
 
-      kakao_sdk.User kakaoUser = await kakao_sdk.UserApi.instance.me();
-      print('카카오 사용자 정보: ${kakaoUser.kakaoAccount?.email}');
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Mainpage()),
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      // Firebase 인증
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      if (userCredential.user != null && mounted) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Mainpage()),
+        );
+      }
     } catch (e) {
-      _showErrorDialog('카카오 로그인에 실패하였습니다.');
+      print("Google 로그인 실패: $e");
+      _showErrorDialog('Google 로그인에 실패했습니다.');
     }
   }
 
@@ -161,6 +164,19 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: 20),
+                  // Google 로그인 버튼을 계정 만들기 버튼 위로 이동
+                  ElevatedButton.icon(
+                    onPressed: _googleLogin,
+                    icon: Icon(Icons.g_mobiledata), // 구글 아이콘
+                    label: Text('Google로 로그인'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, // 배경색을 흰색으로 설정
+                      foregroundColor: Colors.black, // 글자색을 검정색으로 설정
+                      minimumSize: Size(double.infinity, 50),
+                      side: BorderSide(color: Colors.grey), // 테두리 추가
+                    ),
+                  ),
+                  SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -184,14 +200,6 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: Color(0xFF21ADF9),
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: _loginWithKakao,
-                    child: Image.asset(
-                      'assets/kakao_login_medium_wide.png',
-                      fit: BoxFit.contain,
                     ),
                   ),
                 ],

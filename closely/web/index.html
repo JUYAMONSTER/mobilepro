@@ -1,24 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">
+
+  <!-- Google Sign-In Client ID 추가 -->
+  <meta name="google-signin-client_id" content="517852927820-fe389du8jv3dse0n3lvt8h13s6nh7bnc.apps.googleusercontent.com">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,8 +21,34 @@
 
   <title>closely</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK 추가 -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
+
+  <script>
+    // Firebase 설정
+    const firebaseConfig = {
+      apiKey: "AIzaSyABBobf9rYvewS-QhctsVObQzsacXhNIQs",
+      authDomain: "mycloset-3e508.firebaseapp.com",
+      projectId: "mycloset-3e508",
+      storageBucket: "mycloset-3e508.appspot.com",
+      messagingSenderId: "691328470279",
+      appId: "1:691328470279:web:abcdef123456",
+      measurementId: "G-EXAMPLE123"
+    };
+
+    // Firebase 초기화
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
+
+  <!-- Google Maps API 추가 -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCsW8vzkt0_i2bukgR-yhw8HfB2PIRclbA"></script>
+
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

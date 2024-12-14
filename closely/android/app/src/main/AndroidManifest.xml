@@ -1,20 +1,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.closely">
+
+    <!-- 권한 설정 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 인터넷 권한 추가 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 네트워크 상태 권한 추가 -->
+
+    <!-- Google Maps 관련 설정 -->
     <application
         android:label="closely"
-        android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- 카카오 SDK 메타데이터 추가 -->
+        <!-- Firebase 관련 설정 -->
         <meta-data
-            android:name="com.kakao.sdk.AppKey"
-            android:value="@string/kakao_native_app_key" />
+            android:name="com.google.firebase.auth"
+            android:value="true" />
 
-        <!-- 카카오 SDK 관련 권한 추가 -->
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-        <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <!-- Google Maps API Key 추가 (필요에 따라) -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCsW8vzkt0_i2bukgR-yhw8HfB2PIRclbA"/>
 
         <activity
             android:name=".MainActivity"
@@ -40,13 +46,5 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
-
-    <!-- 카카오 SDK와 관련된 권한 설정 -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT" />
-            <data android:mimeType="text/plain" />
-        </intent>
-    </queries>
 
 </manifest>

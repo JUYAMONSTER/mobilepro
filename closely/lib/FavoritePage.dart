@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritePage extends StatefulWidget {
   @override
@@ -6,21 +8,66 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoritePageState extends State<FavoritePage> {
-  // 옷 리스트 데이터 (동적으로 관리)
-  List<String> favoriteClothes = ['옷 1', '옷 2', '옷 3'];
+  List<Map<String, dynamic>> favoriteClothes = []; // 즐겨찾기 의상 리스트
 
-  // 옷 추가 함수
-  void _addFavoriteClothing() {
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteClothingData(); // 즐겨찾기 데이터 로드
+  }
+
+  // SharedPreferences에서 즐겨찾기 데이터 로드
+  Future<void> _loadFavoriteClothingData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? existingData = prefs.getString('clothingData');
+
+    if (existingData != null) {
+      try {
+        List<dynamic> decodedData = jsonDecode(existingData);
+        setState(() {
+          favoriteClothes = decodedData
+              .where((item) => item['favorite'] == 1) // favorite이 1인 의상만 필터링
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+        });
+      } catch (e) {
+        print("Error loading data: $e");
+        setState(() {
+          favoriteClothes = [];
+        });
+      }
+    }
+  }
+
+  // 즐겨찾기 삭제 함수 (favorite 값을 0으로 변경)
+  void _removeFavoriteClothing(int index) async {
+    // 해당 의상의 favorite 값을 0으로 변경
+    final itemToUpdate = favoriteClothes[index];
+    itemToUpdate['favorite'] = 0;
+
+    // 원본 데이터에서 favorite 값을 업데이트
+    await _updateClothingData(itemToUpdate);
+
     setState(() {
-      favoriteClothes.add('옷 ${favoriteClothes.length + 1}');
+      favoriteClothes.removeAt(index); // UI에서 제거
     });
   }
 
-  // 옷 삭제 함수
-  void _removeFavoriteClothing(int index) {
-    setState(() {
-      favoriteClothes.removeAt(index);
-    });
+  // SharedPreferences에 데이터 업데이트
+  Future<void> _updateClothingData(Map<String, dynamic> updatedItem) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? existingData = prefs.getString('clothingData');
+
+    if (existingData != null) {
+      List<dynamic> decodedData = jsonDecode(existingData);
+      for (var item in decodedData) {
+        if (item['name'] == updatedItem['name']) { // 이름으로 비교 (또는 다른 고유 키 사용)
+          item['favorite'] = updatedItem['favorite'];
+          break;
+        }
+      }
+      await prefs.setString('clothingData', jsonEncode(decodedData)); // 업데이트된 데이터 저장
+    }
   }
 
   @override
@@ -57,6 +104,15 @@ class _FavoritePageState extends State<FavoritePage> {
                 ),
                 itemCount: favoriteClothes.length, // 옷 개수에 따라 리스트 생성
                 itemBuilder: (context, index) {
+                  final item = favoriteClothes[index];
+                  final String? imagePath = item['image'];
+                  final String? name = item['name'];
+
+                  // Null 값 처리
+                  if (imagePath == null || name == null || imagePath.isEmpty) {
+                    return Center(child: Text('잘못된 데이터가 있습니다.'));
+                  }
+
                   return Stack(
                     children: [
                       // 회색 네모 박스
@@ -65,14 +121,31 @@ class _FavoritePageState extends State<FavoritePage> {
                           color: Colors.grey, // 회색 네모 박스
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Center(
-                          child: Text(
-                            favoriteClothes[index], // 옷 이름 표시
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: imagePath.startsWith('http')
+                                  ? Image.network(
+                                imagePath,
+                                fit: BoxFit.cover,
+                              )
+                                  : Image.memory(
+                                base64Decode(imagePath),
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                name, // 옷 이름 표시
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       // 오른쪽 아래 별 아이콘
@@ -105,19 +178,6 @@ class _FavoritePageState extends State<FavoritePage> {
             ),
 
             SizedBox(height: 20), // 간격 추가
-
-            // 하단 "즐겨찾기 추가" 버튼
-            ElevatedButton(
-              onPressed: _addFavoriteClothing, // 옷 추가 함수 호출
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue, // 버튼 색상 설정
-                minimumSize: Size(double.infinity, 50), // 버튼 크기
-              ),
-              child: Text(
-                '즐겨찾기 추가',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ),
           ],
         ),
       ),

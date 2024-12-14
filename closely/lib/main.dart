@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Firebase Core 패키지 추가
 import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth 패키지 추가
+import 'Loading.dart';
 import 'Login.dart'; // LoginPage를 가져옵니다.
 import 'MainPage.dart'; // MainPage를 가져옵니다.
 import 'firebase_options.dart'; // Firebase 설정 파일 추가
@@ -40,7 +41,7 @@ class SplashScreen extends StatelessWidget {
         // 로그인이 되어 있지 않다면 로그인 페이지로 이동
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => LoginPage()), // 로그인 페이지로 이동
+          MaterialPageRoute(builder: (context) => MainLoading()), // 로그인 페이지로 이동
         );
       } else {
         // 로그인이 되어 있다면 MainPage로 이동

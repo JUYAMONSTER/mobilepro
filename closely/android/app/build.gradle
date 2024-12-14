@@ -1,6 +1,6 @@
 plugins {
     id "com.android.application"
-    id 'com.google.gms.google-services'
+    id 'com.google.gms.google-services'  // Google Services 플러그인
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -11,12 +11,12 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_23
+        targetCompatibility = JavaVersion.VERSION_23
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_23
     }
 
     defaultConfig {
@@ -25,9 +25,6 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-
-        // 카카오 네이티브 앱 키를 Gradle 프로퍼티로 추가
-        buildConfigField "String", "KAKAO_NATIVE_APP_KEY", project.hasProperty("KAKAO_NATIVE_APP_KEY") ? project.KAKAO_NATIVE_APP_KEY : "\"\""
     }
 
     buildFeatures {
@@ -46,7 +43,12 @@ flutter {
 }
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:33.6.0')
-    implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-firestore'
+    implementation platform('com.google.firebase:firebase-bom:33.7.0') // Firebase BOM 추가
+    implementation 'com.google.firebase:firebase-auth'  // Firebase 인증 라이브러리
+    implementation 'com.google.firebase:firebase-firestore'  // Firebase Firestore 라이브러리
+    implementation 'com.google.android.gms:play-services-auth:21.3.0'  // Google 로그인 의존성 추가
+    implementation 'com.google.android.gms:play-services-maps:19.0.0'  // Google Maps 의존성 추가
+    implementation 'com.google.android.libraries.places:places:4.1.0'  // Google Places API 의존성 추가
 }
+
+// Firebase 및 Google Maps 설정을 위한 `google-services.json` 파일을 `android/app` 폴더에 추가해야 합니다.

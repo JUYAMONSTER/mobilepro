@@ -3,6 +3,8 @@ import 'package:closely/MainPage.dart';
 import 'package:closely/AccountPage.dart';
 import 'package:closely/FavoritePage.dart';
 import 'package:closely/ClothingListPage.dart';
+import 'package:closely/LaundryPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'MenuPage.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -11,10 +13,28 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool isDarkTheme = false; // 기본 테마는 Light
-  String selectedLanguage = 'Korean'; // 기본 언어
   bool isNotificationOn = true; // 기본 알림 설정
   int _currentIndex = 1; // BottomNavigationBar의 현재 선택된 탭 인덱스 (설정 페이지는 인덱스 1)
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotificationSetting(); // 알림 설정 로드
+  }
+
+  // SharedPreferences에서 알림 설정 로드
+  Future<void> _loadNotificationSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isNotificationOn = prefs.getBool('isNotificationOn') ?? true; // 기본값은 true
+    });
+  }
+
+  // SharedPreferences에 알림 설정 저장
+  Future<void> _saveNotificationSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isNotificationOn', value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,91 +42,39 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: Text(
           '앱 설정',
-          style: TextStyle(color: isDarkTheme ? Colors.white : Colors.black),
+          style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: isDarkTheme ? Colors.black : Colors.white,
+        backgroundColor: Colors.white,
         iconTheme: IconThemeData(
-          color: isDarkTheme ? Colors.white : Colors.black,
+          color: Colors.black,
         ),
         elevation: 1,
       ),
       body: Container(
-        color: isDarkTheme ? Colors.black : Colors.white,
+        color: Colors.white,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 테마 설정 버튼
+            // 알림 설정 스위치
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        isDarkTheme = false; // 화이트 테마로 변경
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                    ),
-                    child: Text('화이트 테마'),
+                  Text(
+                    '알림 설정',
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
+                  Switch(
+                    value: isNotificationOn,
+                    onChanged: (value) {
                       setState(() {
-                        isDarkTheme = true; // 블랙 테마로 변경
+                        isNotificationOn = value;
+                        _saveNotificationSetting(value); // 설정 변경 시 저장
                       });
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text('블랙 테마'),
                   ),
                 ],
-              ),
-            ),
-
-            // 언어 설정
-            _buildSettingItem(
-              title: '언어',
-              value: selectedLanguage,
-              onTap: () {
-                setState(() {
-                  selectedLanguage =
-                  selectedLanguage == 'Korean' ? 'English' : 'Korean';
-                });
-              },
-            ),
-
-            // 알림 설정
-            _buildSettingItem(
-              title: '알림 설정',
-              value: isNotificationOn ? '예' : '아니요',
-              onTap: () {
-                setState(() {
-                  isNotificationOn = !isNotificationOn;
-                });
-              },
-            ),
-
-            // 로그아웃 버튼
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    // 로그아웃 동작 추가
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    isDarkTheme ? Colors.grey[800] : Colors.grey[200],
-                    foregroundColor: isDarkTheme ? Colors.white : Colors.black,
-                  ),
-                  child: Text('로그아웃'),
-                ),
               ),
             ),
           ],
@@ -152,40 +120,6 @@ class _SettingsPageState extends State<SettingsPage> {
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-      ),
-    );
-  }
-
-  // 설정 항목 빌더
-  Widget _buildSettingItem({
-    required String title,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                color: isDarkTheme ? Colors.white : Colors.black,
-              ),
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDarkTheme ? Colors.white : Colors.black,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
